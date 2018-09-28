@@ -20,16 +20,35 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 
 const Explorer = require('../../src/js/explorer/Explorer.js');
+const BasicPilot = require('../../src/js/explorer/BasicPilot.js');
+const ClickMachinePilot = require('../../src/js/explorer/ClickMachinePilot.js');
 const GotoAction = require('../../src/js/action/GotoAction.js');
+
 const assert = require('assert');
 
-describe('ExploreSimpleAction', function () {
+describe('Explorer', function () {
     this.timeout(40000);
-	describe('Run GotoAction', function() {
-		it('should open Puppeteer and goto', async function() {
-            let goto = new GotoAction("https://www.google.com");
-            let explorer = new Explorer();
-            await explorer.addAction(goto);
+	describe('with BasicPilot', function() {
+		it('should open Puppeteer and goto Google and then Bing', async function() {
+            let gotogoogle = new GotoAction("https://www.google.com");
+            let gotobing = new GotoAction("https://www.bing.com");
+            let nextActionList = [gotogoogle, gotobing];
+            let basicPilot = new BasicPilot(nextActionList);
+
+            let explorer = new Explorer(basicPilot);
+            let logs = await explorer.start();
+            assert(logs[0].success);
+		});
+    });
+    
+    describe('with ClickMachinePilot', function() {
+		it.only('should open Puppeteer, goto LaBRI and click, click, click', async function() {
+            let gotolabri = new GotoAction("https://www.labri.fr");
+
+            let nextActionList = [gotolabri];
+            let clickMachinePilot = new ClickMachinePilot(nextActionList);
+
+            let explorer = new Explorer(clickMachinePilot);
             let logs = await explorer.start();
             assert(logs[0].success);
 		});

@@ -1,19 +1,14 @@
 const puppeteer = require('puppeteer');
 
 module.exports = class Explorer {
-    constructor() {
-        this.actions = [];
+    constructor(pilot) {
+        this.pilot = pilot;
         this.logs = [];
-        this.index = 0;
         this.defaultOptions = {
             headless : false,
             ignoreHTTPSErrors : true,
-            slowMo : 1000
+            defaultViewport : {width:1024,height:768}
         };
-    }
-
-    addAction(action) {
-        this.actions.push(action);
     }
 
     async start() {
@@ -38,14 +33,12 @@ module.exports = class Explorer {
         this.defaultOptions = newDefaultOptions;
     }
 
-    changeEvaluateFunction(evaluateFunction) {
-
-    }
-
     async explore() {
-        while (this.index < this.actions.length) {
-            await this.exploreAction(this.actions[this.index++]);
-            await this.page.addScriptTag({path:'./optimal-select.js'});
+        while (this.pilot.hasNext()) {
+            let action = this.pilot.next();
+            let log = await this.exploreAction(action);
+            await this.pilot.update(log, this.page);
+            this.logs.push(log);
         }
     }
 
@@ -59,7 +52,7 @@ module.exports = class Explorer {
             log.success = false;
             log.exception = exception;
         }
-        this.logs.push(log);
+        return log;
     }
 
     
