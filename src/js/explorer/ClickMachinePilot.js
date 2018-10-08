@@ -1,11 +1,13 @@
 const ClickAction = require('../action/ClickAction.js');
 const BasicPilot = require('./BasicPilot.js');
 
+const path = require("path");
+
 module.exports = class ClickMachinePilot extends BasicPilot {
     
     async update(log, page) {
-        if (! log.success) return;
-        await page.addScriptTag({path:'./optimal-select.js'});
+		if (! log.success) return;
+        await page.addScriptTag({path: path.resolve(__dirname, '../../../optimal-select.js')});
         let selectorList = await page.evaluate(scanCandidateAction);
         if (selectorList.length === 0) return;
         this.nextActionList = [new ClickAction(selectorList[getRandomInt(selectorList.length)])];
